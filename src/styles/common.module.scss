@@ -1,1 +1,10 @@
-// TODO
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+}
+
+.action {
+  &:hover {
+    text-decoration: underline;
+  }
+}
