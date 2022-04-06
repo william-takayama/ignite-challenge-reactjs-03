@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { FiCalendar, FiUser } from 'react-icons/fi';
 import Link from 'next/link';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
+import { ptBR } from 'date-fns/locale';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -31,22 +32,6 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-const normalizePostResponse = (posts: ApiSearchResponse): PostPagination => ({
-  next_page: posts.next_page,
-  results: posts.results.map(post => ({
-    uid: post.uid,
-    first_publication_date: format(
-      new Date(post.first_publication_date),
-      'dd MMM yyyy'
-    ),
-    data: {
-      title: post.data.title,
-      subtitle: post.data.subtitle,
-      author: post.data.author,
-    },
-  })),
-});
-
 export default function Home({
   postsPagination: { results, next_page },
 }: HomeProps): JSX.Element {
@@ -56,15 +41,14 @@ export default function Home({
   const onFetchMorePosts = async (): Promise<void> => {
     try {
       const response = await fetch(next_page);
-      if (!response.ok) {
-        throw new Error(`An error has occured: ${response.status}`);
-      }
-      const posts: ApiSearchResponse = await response.json();
-      const normalizedPosts = normalizePostResponse(posts);
-      setNewPosts([...newPosts, ...normalizedPosts.results]);
+      // if (!response.ok) {
+      //   console.error(`An error has occured: ${response.status}`);
+      // }
+      const posts = await response.json();
+      setNewPosts([...newPosts, ...posts.results]);
       setHasMorePosts(Boolean(posts.next_page));
     } catch (error) {
-      throw new Error(error.message);
+      console.error(error.message);
     }
   };
 
@@ -73,7 +57,7 @@ export default function Home({
       {newPosts.map(({ uid, data, first_publication_date }) => (
         <section key={uid} className={styles.postCard}>
           <h1>
-            <Link href={uid}>
+            <Link href={`/post/${uid}`}>
               <a className={commonStyles.action}>{data.title}</a>
             </Link>
           </h1>
@@ -85,7 +69,11 @@ export default function Home({
           <div className={styles.footer}>
             <div>
               <FiCalendar size={20} />
-              <time>{first_publication_date}</time>
+              <time>
+                {format(new Date(first_publication_date), 'dd MMM yyyy', {
+                  locale: ptBR,
+                })}
+              </time>
             </div>
 
             <Spacing direction="horizontal" size={24} />
@@ -122,7 +110,8 @@ export const getStaticProps: GetStaticProps = async () => {
 
   return {
     props: {
-      postsPagination: normalizePostResponse(postsResponse),
+      postsPagination: postsResponse,
     },
+    revalidate: 60 * 30,
   };
 };
