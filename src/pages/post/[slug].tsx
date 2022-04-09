@@ -69,7 +69,12 @@ export default function Post({ post }: PostProps): JSX.Element {
     <main className={commonStyles.container}>
       <article>
         <section className={styles.bannerContainer}>
-          <Image src={post.data.banner.url} layout="fill" />
+          <Image
+            alt="post-banner-image"
+            src={post.data.banner.url}
+            layout="fill"
+            priority
+          />
         </section>
 
         <Spacing size={80} />
@@ -124,7 +129,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   ]);
 
   return {
-    fallback: 'blocking',
+    fallback: true,
     paths: posts.results.map(p => ({ params: { slug: p.uid } })),
   };
 };
