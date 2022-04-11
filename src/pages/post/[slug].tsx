@@ -1,7 +1,6 @@
 /* eslint-disable react/no-danger */
 /* eslint-disable react/no-array-index-key */
 import { GetStaticPaths, GetStaticProps } from 'next';
-import Image from 'next/image';
 import Prismic from '@prismicio/client';
 
 import { format } from 'date-fns';
@@ -68,14 +67,10 @@ export default function Post({ post }: PostProps): JSX.Element {
   return (
     <main className={commonStyles.container}>
       <article>
-        <section className={styles.bannerContainer}>
-          <Image
-            alt="post-banner-image"
-            src={post.data.banner.url}
-            layout="fill"
-            priority
-          />
-        </section>
+        <section
+          className={styles.bannerContainer}
+          style={{ background: `url(${post.data.banner.url})` }}
+        />
 
         <Spacing size={80} />
 
